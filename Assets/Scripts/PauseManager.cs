@@ -8,6 +8,7 @@ using UnityEngine.UI;
 public class PauseManager : MonoBehaviour
 {
     public GameObject pauseBtn;
+    
     public GameObject pauseMenuUI,resetLvl;
     
     public GameObject resumeMenuUI,exitBtn,goToLevelBtn;
