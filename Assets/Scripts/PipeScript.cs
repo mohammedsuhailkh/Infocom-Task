@@ -10,6 +10,15 @@ public class PipeScript : MonoBehaviour
   int PossibleRotations =1;
   [SerializeField]bool isPlaced = false;
   GameManager gameManager; 
+  public float gridSize = 1.0f;
+
+  Vector3 offset;
+    bool isDragging = false;
+    float lastRotationTime = 0f;
+    float rotationCooldown = 0.5f;
+    [SerializeField]Transform correctPosition;
+ 
+    
 
   private void Awake() {
     gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
@@ -18,25 +27,24 @@ public class PipeScript : MonoBehaviour
  void Start()
 {
     Time.timeScale = 1f;
-    PossibleRotations = correctrotation.Length;
-    int rand = Random.Range(0, rotations.Length);
-    transform.eulerAngles = new Vector3(0, 0, rotations[rand]);
+    transform.position = GetRandomPosition();
 
-    if (PossibleRotations > 1)
-    {
-        foreach (var correct in correctrotation)
-        {
-            if (Mathf.Round(transform.eulerAngles.z) == correct)
+
+ 
+}
+
+private void Update() {
+    
+            if ( transform.position == correctPosition.position)
             {
                 isPlaced = true;
                 gameManager.CorrectMove();
-                break;
+                
             }
-        }
-    }
+  
     else
     {
-        if (Mathf.Round(transform.eulerAngles.z) == correctrotation[0])
+        if ( transform.position == correctPosition.position)
         {
             isPlaced = true;
             gameManager.CorrectMove();
@@ -44,25 +52,66 @@ public class PipeScript : MonoBehaviour
     }
 }
 
-
-private void OnMouseDown() {
-    transform.Rotate(new Vector3(0, 0, 90));
-
-    bool isCorrectRotation = false;
-    foreach (var rotation in correctrotation) {
-        if (Mathf.Approximately(transform.eulerAngles.z, rotation)) {
-            isCorrectRotation = true;
-            break;
-        }
+ Vector3 GetRandomPosition()
+    {
+        // Calculate random position based on gridSize
+        Vector3 randomPos = new Vector3(Random.Range(-5, 5), Random.Range(-5, 5), 0);
+        randomPos.x = Mathf.Round(randomPos.x / gridSize) * gridSize;
+        randomPos.y = Mathf.Round(randomPos.y / gridSize) * gridSize;
+        return randomPos;
     }
 
-    if (isCorrectRotation && !isPlaced) {
+
+private void OnMouseDown() {
+
+    if (!isDragging)
+        {
+            offset = transform.position - Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        }
+
+
+   
+
+
+    if (isPlaced) {
         isPlaced = true;
         gameManager.CorrectMove();
-    } else if (isPlaced) {
+    } else if (!isPlaced) {
         isPlaced = false;
         gameManager.wrongMove();
     }
 }
 
+
+
+void OnMouseDrag()
+{
+    isDragging = true;
+
+    // Calculate the offset from the initial mouse position
+    Vector3 curScreenPoint = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0);
+    Vector3 curPosition = Camera.main.ScreenToWorldPoint(curScreenPoint) + offset;
+
+    // Calculate the snapped position based on the initial position and grid size
+    curPosition.x = Mathf.Round((curPosition.x - transform.position.x) / gridSize) * gridSize + transform.position.x;
+    curPosition.y = Mathf.Round((curPosition.y - transform.position.y) / gridSize) * gridSize + transform.position.y;
+
+    transform.position = curPosition;
 }
+
+
+    void OnMouseUp()
+    {
+        isDragging = false;
+
+        Vector3 endPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector3 difference = endPosition - transform.position;
+
+    }
+
+
+
+}
+
+
+

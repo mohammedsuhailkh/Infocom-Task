@@ -16,8 +16,11 @@ public class GameManager : MonoBehaviour
        public TextMeshProUGUI timerText;
     public float timeRemaining = 30f;
     private bool timerIsRunning = false;
+    public AudioSource audioSource;
+    public AudioClip water;
     void Start()
     {
+        audioSource = GetComponent<AudioSource>();
         Time.timeScale = 1f;
         timerIsRunning = true;
         totalPipes = PipesHolder.transform.childCount;
@@ -62,8 +65,16 @@ public class GameManager : MonoBehaviour
         Debug.Log("correct move");
         if(correctedPIpes == totalPipes){
             Debug.Log("you won");
-             SceneManager.LoadScene("Gamewon");
+           Invoke("PlayAudio",1f);
+            Invoke("loadScene",2f);
+             
         }
+    }
+void PlayAudio(){
+     audioSource.PlayOneShot(water);
+}
+    void loadScene(){
+        SceneManager.LoadScene("Gamewon");
     }
 
     // Update is called once per frame
@@ -71,3 +82,5 @@ public class GameManager : MonoBehaviour
     correctedPIpes -= 1;
   }
 }
+
+
